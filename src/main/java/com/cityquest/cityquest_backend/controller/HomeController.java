@@ -8,6 +8,6 @@ public class HomeController {
 
     @GetMapping("/")
     public String index() {
-        return "CityQuest backend is running. Visit /h2-console or /auth/login";
+        return "CityQuest backend is running.";
     }
 }

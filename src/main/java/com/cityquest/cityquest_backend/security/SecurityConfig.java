@@ -33,13 +33,10 @@ public class SecurityConfig {
             .httpBasic(httpBasic -> httpBasic.disable())
             .formLogin(form -> form.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/auth/**", "/h2-console/**", "/api/message").permitAll()
+                .requestMatchers("/auth/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        // allow H2 console frames
-        http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
 
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
