@@ -54,16 +54,43 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<?> login(@RequestHeader(value = "Authorization", required = false) String authorization,
+                                   @RequestBody(required = false) AuthRequest authRequest) {
+        String username = null;
+        String password = null;
+
+        // Prefer Basic auth header if present
+        if (authorization != null && authorization.startsWith("Basic ")) {
+            try {
+                String base64 = authorization.substring(6);
+                String decoded = new String(java.util.Base64.getDecoder().decode(base64));
+                int idx = decoded.indexOf(":");
+                if (idx > 0) {
+                    username = decoded.substring(0, idx);
+                    password = decoded.substring(idx + 1);
+                }
+            } catch (IllegalArgumentException ignored) { }
+        }
+
+        // Fall back to JSON body
+        if ((username == null || password == null) && authRequest != null) {
+            username = authRequest.getUsername();
+            password = authRequest.getPassword();
+        }
+
+        if (username == null || password == null) {
+            return ResponseEntity.badRequest().body("Missing credentials");
+        }
+
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
+                    new UsernamePasswordAuthenticationToken(username, password)
             );
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getUsername());
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         final String jwt = jwtUtil.generateToken(userDetails);
 
         return ResponseEntity.ok(new AuthResponse(jwt));

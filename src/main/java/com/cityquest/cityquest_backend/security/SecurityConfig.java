@@ -30,6 +30,8 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> {})
+            .httpBasic(httpBasic -> httpBasic.disable())
+            .formLogin(form -> form.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/auth/**", "/h2-console/**", "/api/message").permitAll()
                 .anyRequest().authenticated()
