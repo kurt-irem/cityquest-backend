@@ -1,22 +1,20 @@
 package com.cityquest.cityquest_backend.controller;
 
-import com.cityquest.cityquest_backend.dto.AuthRequest;
-import com.cityquest.cityquest_backend.dto.AuthResponse;
 import com.cityquest.cityquest_backend.dto.RegisterRequest;
 import com.cityquest.cityquest_backend.model.User;
 import com.cityquest.cityquest_backend.repository.UserRepository;
 import com.cityquest.cityquest_backend.security.JwtUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -29,13 +27,16 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
     private JwtUtil jwtUtil;
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Value("${jwt.cookie-name:jwt-token}")
+    private String cookieName;
+
+    @Value("${jwt.expiration-ms}")
+    private Long expirationMs;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
@@ -54,50 +55,46 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestHeader(value = "Authorization", required = false) String authorization,
-                                   @RequestBody(required = false) AuthRequest authRequest) {
-        String username = null;
-        String password = null;
-
-        // Prefer Basic auth header if present
-        if (authorization != null && authorization.startsWith("Basic ")) {
-            try {
-                String base64 = authorization.substring(6);
-                String decoded = new String(java.util.Base64.getDecoder().decode(base64));
-                int idx = decoded.indexOf(":");
-                if (idx > 0) {
-                    username = decoded.substring(0, idx);
-                    password = decoded.substring(idx + 1);
-                }
-            } catch (IllegalArgumentException ignored) { }
+    public ResponseEntity<?> login(Authentication authentication, HttpServletResponse response) {
+        // Spring Security has already validated Basic Auth credentials
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed");
         }
 
-        // Fall back to JSON body
-        if ((username == null || password == null) && authRequest != null) {
-            username = authRequest.getUsername();
-            password = authRequest.getPassword();
-        }
-
-        if (username == null || password == null) {
-            return ResponseEntity.badRequest().body("Missing credentials");
-        }
-
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password)
-            );
-        } catch (BadCredentialsException ex) {
-            return ResponseEntity.status(401).body("Invalid credentials");
-        }
-
+        String username = authentication.getName();
         final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         final String jwt = jwtUtil.generateToken(userDetails);
 
-        return ResponseEntity.ok(new AuthResponse(jwt));
+        // Set JWT as HttpOnly cookie
+        Cookie cookie = new Cookie(cookieName, jwt);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true); // HTTPS: send cookie only over secure connections
+        cookie.setPath("/");
+        cookie.setMaxAge((int) (expirationMs / 1000)); // Convert ms to seconds
+        cookie.setAttribute("SameSite", "Lax");
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok().body("Login successful");
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        // Clear the JWT cookie
+        Cookie cookie = new Cookie(cookieName, null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok().body("Logout successful");
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> me(@RequestParam Optional<String> username) {
-        return ResponseEntity.ok("This is a placeholder protected endpoint");
+    public ResponseEntity<?> me(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
+        }
+        return ResponseEntity.ok().body("Authenticated as: " + authentication.getName());
     }
 }

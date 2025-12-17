@@ -44,10 +44,10 @@ public class AuthIntegrationTest {
         String token = node.get("token").asText();
         assertThat(token).isNotEmpty();
 
-        // call protected
-        HttpResult hello = getWithAuth(base + "/api/hello", token);
-        assertThat(hello.status).isBetween(200, 299);
-        assertThat(hello.body).contains("inttest");
+        // call protected home endpoint
+        HttpResult home = getWithAuth(base + "/", token);
+        assertThat(home.status).isBetween(200, 299);
+        assertThat(home.body).contains("CityQuest backend is running");
     }
 
     private HttpResult postJson(String urlStr, String json) throws Exception {
