@@ -21,7 +21,6 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    // simple roles storage as CSV or single role for now
     private String roles;
 
 }

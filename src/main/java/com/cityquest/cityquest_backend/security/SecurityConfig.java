@@ -3,6 +3,7 @@ package com.cityquest.cityquest_backend.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -41,9 +42,39 @@ public class SecurityConfig {
             .cors(withDefaults())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                // Always allow CORS preflight requests
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                // Auth routes
                 .requestMatchers("/auth/register").permitAll()
-                .requestMatchers("/auth/login").authenticated() // Basic Auth required
+                .requestMatchers("/auth/login").authenticated() // Basic Auth for login
                 .requestMatchers("/auth/logout").permitAll()
+
+                // Public read endpoints for Places
+                .requestMatchers(HttpMethod.GET, "/api/places").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/places/").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/places/*").permitAll() // e.g., /api/places/{id}
+                .requestMatchers(HttpMethod.GET, "/api/places/search").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/places/category/**").permitAll()
+
+                // Public read endpoints for Collections
+                .requestMatchers(HttpMethod.GET, "/api/collections").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/collections/").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/collections/*").permitAll() // e.g., /api/collections/{id}
+                .requestMatchers(HttpMethod.GET, "/api/collections/search").permitAll()
+
+                // Protected collections endpoints
+                .requestMatchers(HttpMethod.GET, "/api/collections/my-collections").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/collections/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/collections/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/collections/**").authenticated()
+
+                // Protected endpoints: own places and write/update/delete
+                .requestMatchers(HttpMethod.GET, "/api/places/my-places").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/places/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/places/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/places/**").authenticated()
+
                 .anyRequest().authenticated()
             )
             .httpBasic(withDefaults()) // Enable Basic Auth for /auth/login
@@ -60,10 +91,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("http://localhost:5173"); // Vite dev (HTTP)
-        config.addAllowedOrigin("https://localhost:5173"); // Vite dev (HTTPS)
-        config.addAllowedOrigin("http://localhost"); // Docker nginx
-        config.addAllowedOrigin("http://localhost:80");
+        config.addAllowedOrigin("https://localhost:5173"); // Vite dev 
+        config.addAllowedOrigin("https://localhost"); 
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         config.setAllowCredentials(true);
