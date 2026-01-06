@@ -31,7 +31,7 @@ public class Place {
     
     private Double longitude;
 
-    @Column(unique = true)
+    // Unique only when not null - enforced by database partial index
     private String googlePlaceId;
 
     private String googleMapsUrl;
