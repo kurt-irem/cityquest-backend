@@ -73,6 +73,12 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/collections/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/collections/**").authenticated()
 
+                // Protected visits endpoints
+                .requestMatchers(HttpMethod.GET, "/api/visits/my-visits").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/visits/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/visits/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/visits/**").authenticated()
+
                 // Protected endpoints: own places and write/update/delete
                 .requestMatchers(HttpMethod.GET, "/api/places/my-places").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/places/**").authenticated()
