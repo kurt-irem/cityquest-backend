@@ -79,6 +79,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/visits/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/visits/**").authenticated()
 
+                // Achievements
+                .requestMatchers("/api/achievements/**").authenticated()
+
                 // Protected endpoints: own places and write/update/delete
                 .requestMatchers(HttpMethod.GET, "/api/places/my-places").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/places/**").authenticated()
