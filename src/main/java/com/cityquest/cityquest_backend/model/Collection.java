@@ -23,6 +23,9 @@ public class Collection {
 
     private String color;
 
+    @Column(length = 100)
+    private String icon;
+
     private LocalDate createdAt;
 
     @ManyToMany
@@ -59,6 +62,9 @@ public class Collection {
 
     public String getColor() { return color; }
     public void setColor(String color) { this.color = color; }
+
+    public String getIcon() { return icon; }
+    public void setIcon(String icon) { this.icon = icon; }
 
     public LocalDate getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDate createdAt) { this.createdAt = createdAt; }

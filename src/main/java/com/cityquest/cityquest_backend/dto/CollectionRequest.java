@@ -7,6 +7,7 @@ public class CollectionRequest {
     private String description;
     private String theme;
     private String color;
+    private String icon;
     private List<Long> placeIds; // optional: place IDs to initially add to the collection
 
     public String getTitle() { return title; }
@@ -20,6 +21,9 @@ public class CollectionRequest {
 
     public String getColor() { return color; }
     public void setColor(String color) { this.color = color; }
+
+    public String getIcon() { return icon; }
+    public void setIcon(String icon) { this.icon = icon; }
 
     public List<Long> getPlaceIds() { return placeIds; }
     public void setPlaceIds(List<Long> placeIds) { this.placeIds = placeIds; }

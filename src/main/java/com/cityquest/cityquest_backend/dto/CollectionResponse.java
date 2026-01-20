@@ -9,6 +9,7 @@ public class CollectionResponse {
     private String description;
     private String theme;
     private String color;
+    private String icon;
     private LocalDate createdAt;
     private String createdByUsername;
     private Long createdByUserId;
@@ -28,6 +29,9 @@ public class CollectionResponse {
 
     public String getColor() { return color; }
     public void setColor(String color) { this.color = color; }
+
+    public String getIcon() { return icon; }
+    public void setIcon(String icon) { this.icon = icon; }
 
     public LocalDate getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDate createdAt) { this.createdAt = createdAt; }

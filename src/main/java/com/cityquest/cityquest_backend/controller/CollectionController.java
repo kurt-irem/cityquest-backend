@@ -73,6 +73,7 @@ public class CollectionController {
         c.setDescription(request.getDescription());
         c.setTheme(request.getTheme());
         c.setColor(request.getColor());
+        c.setIcon(defaultIcon(request.getIcon()));
         c.setCreatedBy(user);
 
         // Optional: initialize places
@@ -101,6 +102,7 @@ public class CollectionController {
         c.setDescription(request.getDescription());
         c.setTheme(request.getTheme());
         c.setColor(request.getColor());
+        c.setIcon(defaultIcon(request.getIcon()));
 
         if (request.getPlaceIds() != null) {
             List<Place> places = placeRepository.findAllById(request.getPlaceIds());
@@ -179,6 +181,7 @@ public class CollectionController {
         resp.setDescription(c.getDescription());
         resp.setTheme(c.getTheme());
         resp.setColor(c.getColor());
+        resp.setIcon(defaultIcon(c.getIcon()));
         resp.setCreatedAt(c.getCreatedAt());
         resp.setCreatedByUsername(c.getCreatedBy() != null ? c.getCreatedBy().getUsername() : null);
         resp.setCreatedByUserId(c.getCreatedBy() != null ? c.getCreatedBy().getId() : null);
@@ -207,5 +210,9 @@ public class CollectionController {
         if (authentication == null || !authentication.isAuthenticated()) return null;
         String username = authentication.getName();
         return userRepository.findByUsername(username).orElse(null);
+    }
+
+    private String defaultIcon(String icon) {
+        return (icon == null || icon.isBlank()) ? "bookmark" : icon;
     }
 }
