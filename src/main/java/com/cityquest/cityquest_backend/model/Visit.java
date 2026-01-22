@@ -38,6 +38,7 @@ public class Visit {
 
     private Integer rating;
 
+    @Column(columnDefinition = "TEXT")
     private String image;
 
     @ElementCollection

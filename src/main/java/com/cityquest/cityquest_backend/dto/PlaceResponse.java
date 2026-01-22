@@ -20,6 +20,7 @@ public class PlaceResponse {
     private Double longitude;
     private String googlePlaceId;
     private String googleMapsUrl;
+    private String image;
     private String createdByUsername;
     private Long createdByUserId;
     private LocalDateTime createdAt;

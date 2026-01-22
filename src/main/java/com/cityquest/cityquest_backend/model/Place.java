@@ -36,6 +36,9 @@ public class Place {
 
     private String googleMapsUrl;
 
+    @Column(columnDefinition = "TEXT")
+    private String image;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_user_id", nullable = false)
     private User createdBy;

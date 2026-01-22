@@ -17,4 +17,5 @@ public class PlaceRequest {
     private Double longitude;
     private String googlePlaceId;
     private String googleMapsUrl;
+    private String image;
 }

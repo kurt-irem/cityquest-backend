@@ -96,6 +96,7 @@ public class PlaceController {
                 .longitude(request.getLongitude())
                 .googlePlaceId(request.getGooglePlaceId())
                 .googleMapsUrl(request.getGoogleMapsUrl())
+            .image(request.getImage())
                 .createdBy(user)
                 .build();
 
@@ -123,6 +124,7 @@ public class PlaceController {
                     place.setLongitude(request.getLongitude());
                     place.setGooglePlaceId(request.getGooglePlaceId());
                     place.setGoogleMapsUrl(request.getGoogleMapsUrl());
+                    place.setImage(request.getImage());
                     Place updated = placeRepository.save(place);
                     return ResponseEntity.ok(toResponse(updated));
                 })
@@ -166,6 +168,7 @@ public class PlaceController {
                 .longitude(place.getLongitude())
                 .googlePlaceId(place.getGooglePlaceId())
                 .googleMapsUrl(place.getGoogleMapsUrl())
+            .image(place.getImage())
                 .createdByUsername(place.getCreatedBy().getUsername())
                 .createdByUserId(place.getCreatedBy().getId())
                 .createdAt(place.getCreatedAt())
