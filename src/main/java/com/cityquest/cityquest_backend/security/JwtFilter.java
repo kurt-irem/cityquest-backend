@@ -38,10 +38,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // Skip JWT filter for auth endpoints (login/register/logout)
         String path = request.getRequestURI();
-        System.out.println("JWT Filter: Processing request to: " + path + " Method: " + request.getMethod());
         
         if (path.startsWith("/auth/login") || path.startsWith("/auth/register") || path.startsWith("/auth/logout")) {
-            System.out.println("JWT Filter: Skipping auth endpoint");
             filterChain.doFilter(request, response);
             return;
         }
@@ -70,9 +68,8 @@ public class JwtFilter extends OncePerRequestFilter {
         if (token != null) {
             try {
                 username = jwtUtil.extractUsername(token);
-                System.out.println("JWT Filter: Found token for user: " + username);
             } catch (Exception e) {
-                System.err.println("JWT Filter: Failed to extract username: " + e.getMessage());
+                // ignore
             }
         }
 
@@ -86,9 +83,6 @@ public class JwtFilter extends OncePerRequestFilter {
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
-                System.out.println("JWT Filter: Successfully authenticated user: " + username);
-            } else {
-                System.err.println("JWT Filter: Token validation failed for user: " + username);
             }
         }
 
